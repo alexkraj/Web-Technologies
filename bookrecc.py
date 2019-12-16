@@ -34,9 +34,12 @@ data_ratings = [
 ratings_df = pd.DataFrame(
     data_ratings, columns=["User_ID", "Book_ID", "Rating"], dtype=int
 )
-ratings_df['User_ID'] = ratings_df['User_ID'].apply(pd.to_numeric, errors='coerce')
-ratings_df['Book_ID'] = ratings_df['Book_ID'].apply(pd.to_numeric, errors='coerce')
-ratings_df['Rating'] = ratings_df['Rating'].apply(pd.to_numeric, errors='coerce')
+ratings_df['User_ID'] = ratings_df['User_ID'].apply(pd.to_numeric,
+                                                    errors='coerce')
+ratings_df['Book_ID'] = ratings_df['Book_ID'].apply(pd.to_numeric,
+                                                    errors='coerce')
+ratings_df['Rating'] = ratings_df['Rating'].apply(pd.to_numeric,
+                                                  errors='coerce')
 
 # making the recommendations matrix, fill the rest with 0
 R_df = ratings_df.pivot(index="User_ID",
@@ -48,28 +51,45 @@ R_df = ratings_df.pivot(index="User_ID",
 # de-meaning the data
 # R = R_df.as_matrix()
 R = R_df.rename_axis('ID').values
-# print (R)
 user_ratings_mean = np.mean(R, axis=1)
 R_demeaned = R - user_ratings_mean.reshape(-1, 1)
 
-# # singular value decomposition
-# U, sigma, Vt = svds(R_demeaned, k=50)
-# sigma = np.diag(sigma)
+# singular value decomposition
+U, sigma, Vt = svds(R_demeaned, k=50)
+sigma = np.diag(sigma)
 
-# all_user_predicted_ratings = (np.dot(np.dot(U, sigma), Vt) +
-#                               user_ratings_mean.reshape(-1, 1))
-# preds_df = pd.DataFrame(all_user_predicted_ratings, columns=R_df.columns)
+# making predictions from decomposed matrices
+all_user_predicted_ratings = (np.dot(np.dot(U, sigma), Vt) +
+                              user_ratings_mean.reshape(-1, 1))
+preds_df = pd.DataFrame(all_user_predicted_ratings, columns=R_df.columns)
 
 
-# def recommend_movies(predictions_df, userID, movies_df, original_ratings_df, num_recommendations=5):
-#     user_row_number = userID
-#     sorted_user_predictions = predictions_df.iloc[user_row_number].sort_values(ascending=False)
+def recommend_movies(predictions_df, userID, books_df, original_ratings_df, num_recommendations=15):
+    user_row_number = userID
+    sorted_user_predictions = predictions_df.iloc[user_row_number].sort_values(ascending=False)
 
-#     user_data = original_ratings_df[original_ratings_df.User_ID == (userID)]
-#     user_full = (user_data.merge(movies_df, how = 'left', left_on = 'MovieID', right_on = 'MovieID').
-#                      sort_values(['Rating'], ascending=False)
-#                  )
+    user_data = original_ratings_df[original_ratings_df.User_ID == (userID)]
+    user_full = (user_data.merge(books_df,
+                                 how='left',
+                                 left_on='Book_ID',
+                                 right_on='Book_ID'
+                                 ).sort_values(['Rating'], ascending=False))
+    print('User {0} has already rated {1} books.'.format(userID, user_full.shape[0]))
+    print('Recommending the highest {0} predicted ratings books not already rated.'.format(num_recommendations))
 
+    recommendations = (books_df[~books_df['Book_ID'].isin(user_full['Book_ID'])].
+                       merge(pd.DataFrame(sorted_user_predictions).reset_index(),
+                             how='left',
+                             left_on='Book_ID',
+                             right_on='Book_ID').rename(
+                                columns={user_row_number: 'Predictions'}).sort_values(
+                                    'Predictions', ascending=False).iloc[:num_recommendations, :-1]
+                       )
+    return user_full, recommendations
+
+
+already_rated, predictions = recommend_movies(preds_df, 4, books_df, ratings_df, 15)
+print(already_rated.head(15))
 
 @app.route("/")
 def main():
