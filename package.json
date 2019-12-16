@@ -1,0 +1,24 @@
+{
+  "name": "web-technologies",
+  "version": "1.0.0",
+  "description": "Recommendation System - Summative Assessment 2019",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexkraj/Web-Technologies.git"
+  },
+  "keywords": [
+    "nodejs",
+    "recommendation",
+    "systems"
+  ],
+  "author": "A Krajewski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexkraj/Web-Technologies/issues"
+  },
+  "homepage": "https://github.com/alexkraj/Web-Technologies#readme"
+}
