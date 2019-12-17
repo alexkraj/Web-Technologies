@@ -2,10 +2,22 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
     <title>BookRecc</title>
   </head>
+  
   <body>
-    <h1> This is where the book recommendation system will be </h1>
-    <p> Yay, Flask! </p>
+    <h1> BookRecc </h1>
+    <div class="navBar"> 
+      <button class="button btnRec">Get my recommendations</button>
+      <button class="button btnRate">Make some ratings</button>
+      <button class="button btnRecOther">Check someone's recommendations</button>
+    </div>
+    <div class="container">
+      
+    </div>
+    
   </body>
-</html>
+
+  </html>
