@@ -10,10 +10,9 @@ import random
 import json
 
 app = Flask(__name__)
-user = 4  # 2979
+user = 1
 user_books = []  # stores book IDs that the user has already rated
 
-# global variables:
 books_df = []
 ratings_df = []
 
@@ -93,8 +92,6 @@ def recommend_books(predictions_df, userID, books_df,
 @app.route("/")
 def home():
     message = ""
-    if len(user_books) < 1:
-        message = "Cannot construct profile without rated books. Please make some ratings"
     user_info = {'user_ID': user,
                  'message': message}
     return render_template("home.html", user=user_info)
@@ -119,12 +116,13 @@ def my_recc():
                                                  user,
                                                  books_df,
                                                  ratings_df,
-                                                 15)
+                                                 10)
 
-    recommended_books = already_rated.head(15)
+    recommended_books = already_rated.head(10)
     books_json = recommended_books.to_json(orient="records")
     user_info = {'user_ID': user,
                  'rec_books': books_json}
+
     return json.dumps(user_info)
 
 
@@ -156,15 +154,17 @@ def rate():
 
 @app.route("/addRating", methods=['POST'])
 def addRating():
-    rating = request.form['rating']
-    book = request.form['book_id']
+    rating = int(request.form['rating'])
+    book = int(request.form['book_id'])
     user_books.append(book)
 
     arr = ["User_ID", "Book_ID", "Rating"]
     temp = pd.DataFrame([[user, book, rating]], columns=arr)
 
+    global ratings_df
+
     ratings_df_new = ratings_df.append(temp, ignore_index=True)
-    print(ratings_df_new)
+    ratings_df = ratings_df_new
     return "success"
 
 
