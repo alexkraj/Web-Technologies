@@ -1,13 +1,26 @@
 @import url('https://fonts.googleapis.com/css?family=Courier+Prime&display=swap');
-h1 {
+
+.header{
+    text-align: center;
+    padding-top: 40px;
+
+}
+h1{
     font-family: 'Courier Prime', monospace;
     font-weight: bold;
     font-size: 60px;
-    text-align: center;
+    display: inline-block;
+}
+.image{
+    height: 5%;
+    width: 5%;
+    min-width: 60px;
+    display: inline-block;
 }
 
 .navBar{
-    text-align: center
+    text-align: center;
+    padding-bottom: 40px;
 }
 
 .button {
@@ -16,7 +29,6 @@ h1 {
     color: white;
     padding: 15px 32px;
     text-align: center;
-    text-decoration: none;
     display: inline-block;
     font-size: 16px;
     margin: 4px 2px;
@@ -28,4 +40,15 @@ h1 {
 }
 .btnRate {
     background-color:red;
+}
+
+.container{
+    text-align: center;
+}
+
+.main{
+    margin: auto;
+    min-height: 450px;
+    width: 85%;
+    background-color: #E8E8E8;
 }
