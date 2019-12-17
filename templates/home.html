@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
@@ -16,16 +17,69 @@
     </div>
 
     <div class="navBar"> 
-      <button class="button btnRec" href="/myrecommendations">Get my recommendations</button>
-      <button class="button btnRate" href="/ratings">Make some ratings</button>
-      <button class="button btnRecOther" href="/otherrecommendations">Check someone's recommendations</button>
+      <p class="welcome_tag">Welcome, user {{ user.user_ID }}</p>
+      <a class="button btnRec" onclick="getRecommendations()">Get my recommendations</a>
+      <a class="button btnRate" onclick="makeRatings()"">Make some ratings</a>
+      <a class="button btnRecOther" onclick="otherRecommendations()">Check someone's recommendations</a>
     </div>
 
     <div class="container" >
-      <div class="main">
+      <div class="main" id="main">
       </div>
     </div>
     
   </body>
 
-  </html>
+</html>
+
+<script type="text/javascript">
+function getRecommendations(){
+  event.preventDefault();
+  const myNode = document.getElementById("main");
+  while (myNode.firstChild) {
+    myNode.removeChild(myNode.firstChild);
+  }
+  $.get("/myrecc",function(data){
+    let data2 = JSON.parse(data);
+    let books = JSON.parse(data2.rec_books);
+    for (let i in books){
+      let node = document.createElement("LI");
+      let text = document.createElement("a");
+      let text_c = document.createTextNode(books[i].Title+" ("+books[i].Authors+")");
+      let image = document.createElement("img");
+      image.setAttribute("src",books[i].Image);
+      image.className = "list_image";
+      text.className = "list_text";
+      text.appendChild(text_c);
+      node.appendChild(image);
+      node.appendChild(text);
+      node.className = "list_element";
+      document.getElementById("main").appendChild(node);
+    }
+  });
+}
+</script>
+
+<script type="text/javascript">
+  function makeRatings(){
+    event.preventDefault();
+    const myNode = document.getElementById("main");
+    while (myNode.firstChild) {
+      myNode.removeChild(myNode.firstChild);
+    }
+    $.get("/rate",function(data){
+      let data2 = JSON.parse(data);
+      console.log(data2);
+  });
+ }
+</script>
+
+<script type="text/javascript">
+  function otherRecommendations(){
+    event.preventDefault();
+    const myNode = document.getElementById("main");
+    while (myNode.firstChild) {
+      myNode.removeChild(myNode.firstChild);
+    }
+ }
+</script>

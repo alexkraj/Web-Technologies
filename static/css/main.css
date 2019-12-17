@@ -10,6 +10,8 @@ h1{
     font-weight: bold;
     font-size: 60px;
     display: inline-block;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 .image{
     height: 5%;
@@ -23,6 +25,12 @@ h1{
     padding-bottom: 40px;
 }
 
+.welcome_tag {
+    font-family: 'Courier Prime', monospace;
+    font-weight: bold;
+    font-size: 15px;
+}
+
 .button {
     background-color: #4CAF50; /* Green */
     border: none;
@@ -31,6 +39,7 @@ h1{
     text-align: center;
     display: inline-block;
     font-size: 16px;
+    font-family: 'Courier Prime', monospace;
     margin: 4px 2px;
     cursor: pointer;
 }
@@ -51,4 +60,14 @@ h1{
     min-height: 450px;
     width: 85%;
     background-color: #E8E8E8;
+}
+
+.list_image{
+    height: 40px;
+}
+.list_text{
+    padding-left: 10px;
+}
+.list_element{
+    font-family: 'Courier Prime', monospace;
 }
