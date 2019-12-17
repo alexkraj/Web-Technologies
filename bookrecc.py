@@ -2,20 +2,20 @@
 # SSA - Web Technologies
 # Recommendation system
 # Dataset from GoodBooks
-
-from flask import Flask, render_template, request  # , redirect, response
+from flask import Flask, render_template, request
 from scipy.sparse.linalg import svds
 import pandas as pd
 import numpy as np
-
-# import sys
 import random
 import json
 
 app = Flask(__name__)
 user = 4  # 2979
 user_books = []  # stores book IDs that the user has already rated
-ratings_profile = {}
+
+# global variables:
+books_df = []
+ratings_df = []
 
 
 # read the BOOKS and RATINGS and convert into panda dataframe
@@ -62,22 +62,6 @@ def demean_data(ratings):
     return demeaned_ratings, user_ratings_mean
 
 
-# TODO clean up these functions below:
-books_df, ratings_df = read_data("data/data_books.csv", "data/data_ratings.csv")
-# print(ratings_df.head())
-R_df = create_matrix(ratings_df)
-R_demeaned, user_ratings_mean = demean_data(R_df)
-
-# singular value decomposition
-U, sigma, Vt = svds(R_demeaned, k=50)
-sigma = np.diag(sigma)
-
-# making predictions from decomposed matrices
-all_user_predicted_ratings = (np.dot(np.dot(U, sigma), Vt) +
-                              user_ratings_mean.reshape(-1, 1))
-preds_df = pd.DataFrame(all_user_predicted_ratings, columns=R_df.columns)
-
-
 def recommend_books(predictions_df, userID, books_df,
                     original_ratings_df, num_recommendations=15):
     user_row_number = userID
@@ -93,8 +77,7 @@ def recommend_books(predictions_df, userID, books_df,
                                  ).sort_values(['Rating'], ascending=False))
     print('User {0} has already rated {1} books.'.format(userID,
                                                          user_full.shape[0]))
-    print('''Recommending the highest {0} predicted
-             ratings books not already rated.'''.format(num_recommendations))
+    print('''Recommending the highest {0} predicted ratings books not already rated.'''.format(num_recommendations))
 
     recommendations = (books_df[~books_df['Book_ID'].isin(user_full['Book_ID'])].
                        merge(pd.DataFrame(sorted_user_predictions).reset_index(),
@@ -107,22 +90,37 @@ def recommend_books(predictions_df, userID, books_df,
     return user_full, recommendations
 
 
-# TODO integrate this whole process down here into flask and make interactive
-already_rated, predictions = recommend_books(preds_df,
-                                             user,
-                                             books_df,
-                                             ratings_df,
-                                             15)
-
-
 @app.route("/")
 def home():
-    user_info = {'user_ID': user}
+    message = ""
+    if len(user_books) < 1:
+        message = "Cannot construct profile without rated books. Please make some ratings"
+    user_info = {'user_ID': user,
+                 'message': message}
     return render_template("home.html", user=user_info)
 
 
 @app.route("/myrecc", methods=['GET'])
 def my_recc():
+
+    R_df = create_matrix(ratings_df)
+    R_demeaned, user_ratings_mean = demean_data(R_df)
+
+    # singular value decomposition
+    U, sigma, Vt = svds(R_demeaned, k=50)
+    sigma = np.diag(sigma)
+
+    # making predictions from decomposed matrices
+    all_user_predicted_ratings = (np.dot(np.dot(U, sigma), Vt) +
+                                  user_ratings_mean.reshape(-1, 1))
+    preds_df = pd.DataFrame(all_user_predicted_ratings, columns=R_df.columns)
+
+    already_rated, predictions = recommend_books(preds_df,
+                                                 user,
+                                                 books_df,
+                                                 ratings_df,
+                                                 15)
+
     recommended_books = already_rated.head(15)
     books_json = recommended_books.to_json(orient="records")
     user_info = {'user_ID': user,
@@ -133,21 +131,43 @@ def my_recc():
 @app.route("/rate", methods=['GET'])
 def rate():
     book_ids = []
-    for i in range(0, 20):
+    for i in range(0, 15):
         val = random.randint(1, 10000)
         if((val in book_ids) or (val in user_books)):
             break
         book_ids.append(val)
-    books = {'book_IDs': book_ids}
+
+    book_names = []
+    book_images = []
+    book_authors = []
+
+    books_df.set_index("Book_ID")
+    for book_id in book_ids:
+        book_names.append(books_df.loc[book_id]["Title"])
+        book_images.append(books_df.loc[book_id]["Image"])
+        book_authors.append(books_df.loc[book_id]["Authors"])
+
+    books = {'book_IDs': book_ids,
+             'book_titles': book_names,
+             'book_images': book_images,
+             'book_authors': book_authors}
     return json.dumps(books)
 
 
-# TODO change this!
-@app.route("/other")
-def rec():
-    user_info = {'user_ID': user}
-    return json.dumps(user_info)
+@app.route("/addRating", methods=['POST'])
+def addRating():
+    rating = request.form['rating']
+    book = request.form['book_id']
+    user_books.append(book)
+
+    arr = ["User_ID", "Book_ID", "Rating"]
+    temp = pd.DataFrame([[user, book, rating]], columns=arr)
+
+    ratings_df_new = ratings_df.append(temp, ignore_index=True)
+    print(ratings_df_new)
+    return "success"
 
 
 if __name__ == "__main__":
+    books_df, ratings_df = read_data("data/data_books.csv", "data/data_ratings.csv")
     app.run(debug=True)

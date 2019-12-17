@@ -20,11 +20,11 @@
       <p class="welcome_tag">Welcome, user {{ user.user_ID }}</p>
       <a class="button btnRec" onclick="getRecommendations()">Get my recommendations</a>
       <a class="button btnRate" onclick="makeRatings()"">Make some ratings</a>
-      <a class="button btnRecOther" onclick="otherRecommendations()">Check someone's recommendations</a>
     </div>
 
     <div class="container" >
       <div class="main" id="main">
+          <a class = "temp_message">{{ user.message }}</a>
       </div>
     </div>
     
@@ -67,19 +67,88 @@ function getRecommendations(){
     while (myNode.firstChild) {
       myNode.removeChild(myNode.firstChild);
     }
+
+    let node = document.createElement("a");
+    let text = document.createTextNode("Please rate the books below on a scale of 1-5. Leave as 0 if you have not read the book.");
+    node.className = "ratings_information";
+    node.appendChild(text);
+    document.getElementById("main").appendChild(node);
+
     $.get("/rate",function(data){
       let data2 = JSON.parse(data);
-      console.log(data2);
+      for (i=0; i<15;i++){
+        let image = data2.book_images[i]
+        let title = data2.book_titles[i]
+        let authors = data2.book_authors[i]
+        let book_id = data2.book_IDs[i]
+        let rating_form = document.createElement("FORM");
+        rating_form.className = "rating";
+        rating_form.setAttribute("id", "rating_"+book_id);
+        let text = document.createElement("a");
+        let text_c = document.createTextNode(title+"("+authors+")");
+        let image_node = document.createElement("img");
+        image_node.setAttribute("src", image);
+        image_node.className = "list_image";
+        text.className = "list_text";
+        text.appendChild(text_c);
+        rating_form.appendChild(image_node);
+        rating_form.appendChild(text);
+
+        let select = document.createElement("select");
+        select.setAttribute("id", "select"+book_id);
+        let option = document.createElement("option");
+        option.innerHTML = ""+0;
+        option.setAttribute("value",""+0);
+        select.appendChild(option);
+        option = document.createElement("option");
+        option.innerHTML = ""+1;
+        option.setAttribute("value",""+1);
+        select.appendChild(option);
+        option = document.createElement("option");
+        option.innerHTML = ""+2;
+        option.setAttribute("value",""+2);
+        select.appendChild(option);
+        option = document.createElement("option");
+        option.innerHTML = ""+3;
+        option.setAttribute("value",""+3);
+        select.appendChild(option);
+        option = document.createElement("option");
+        option.innerHTML = ""+4;
+        option.setAttribute("value",""+4);
+        select.appendChild(option);
+        option = document.createElement("option");
+        option.innerHTML = ""+5;
+        option.setAttribute("value",""+5);
+        select.appendChild(option);
+        
+        rating_form.appendChild(select);
+
+        let btnSubmit = document.createElement("button");
+        btnSubmit.setAttribute("id","btnSubmit"+book_id);
+        btnSubmit.innerHTML = "OK";
+        btnSubmit.setAttribute("onClick","rate("+book_id+")");
+        rating_form.appendChild(btnSubmit);
+
+        document.getElementById("main").appendChild(rating_form);
+
+      }
   });
  }
 </script>
 
 <script type="text/javascript">
-  function otherRecommendations(){
+  // THIS FUNCTION IS THE ONE BY ONE SENDING OF A RATED BOOK TO THE SERVER
+  function rate(book_id){
     event.preventDefault();
-    const myNode = document.getElementById("main");
-    while (myNode.firstChild) {
-      myNode.removeChild(myNode.firstChild);
-    }
+    let rating = document.getElementById("select"+book_id).value;
+    $.post("/addRating",
+      {
+        "rating": rating, 
+        "book_id":book_id
+      }
+      , function(data, status){
+        document.getElementById("btnSubmit"+book_id).disabled = true;
+        }
+      );
  }
 </script>

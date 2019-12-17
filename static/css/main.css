@@ -32,7 +32,7 @@ h1{
 }
 
 .button {
-    background-color: #4CAF50; /* Green */
+    background-color: blue; 
     border: none;
     color: white;
     padding: 15px 32px;
@@ -45,7 +45,7 @@ h1{
 }
 
 .btnRec {
-    background-color:blue;
+    background-color : #4CAF50;
 }
 .btnRate {
     background-color:red;
@@ -66,8 +66,22 @@ h1{
     height: 40px;
 }
 .list_text{
-    padding-left: 10px;
-}
-.list_element{
     font-family: 'Courier Prime', monospace;
+    padding-left: 8px;
+}
+
+.ratings_information{
+    padding-top: 10px;
+    font-weight: bold;
+    font-family: 'Courier Prime', monospace;
+    font-size: 15px;
+    color: red;
+}
+
+.temp_message {
+    padding-top: 10px;
+    font-weight: bold;
+    font-family: 'Courier Prime', monospace;
+    font-size: 20px;
+    color: #4CAF50;
 }
