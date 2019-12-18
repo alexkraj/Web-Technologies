@@ -1,7 +1,7 @@
 # CTVT58
 # SSA - Web Technologies
 # Recommendation system
-# Dataset from GoodBooks
+# Dataset from GoodBooks 10000
 from flask import Flask, render_template, request
 from scipy.sparse.linalg import svds
 import pandas as pd
